@@ -1,0 +1,11 @@
+########################## To create mirror on the ACPC Control server
+######################################################################
+- name: Install and Deploy mirror on the control server, and keep it updated
+  hosts: localhost
+  #hosts: control
+  connection: local
+  become: yes
+  gather_facts: no
+  roles:
+          - role: mirror
+

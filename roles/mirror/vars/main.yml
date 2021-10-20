@@ -1,0 +1,4 @@
+---
+# vars file for mirror
+ubuntu_dist: "bionic"
+ubuntu_arch: "i386"

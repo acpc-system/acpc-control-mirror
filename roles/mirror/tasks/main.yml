@@ -1,0 +1,50 @@
+        - name: Update apt cache repos, and install apt-mirror package
+          apt:
+                  name: apt-mirror
+                  update_cache: yes
+
+        - name: Create Mirror directory tree under /MirrorPool
+          file:
+                  path: "/MirrorPool/{{item}}"
+                  state: directory
+                  mode: 0755
+          with_items: ["mirror","skel","var"]
+
+        - name: Update base_path in /etc/apt/mirror.list
+          lineinfile:
+                  path: /etc/apt/mirror.list
+                  regexp: "set base_path"
+                  line: "set base_path /MirrorPool"
+
+        - name: Update defaultarch  in /etc/apt/mirror.list
+          lineinfile:
+                  path: /etc/apt/mirror.list
+                  regexp: "set defaultarch"
+                  line: "set defaultarch i386"
+
+        - name: Update the mirror tree locations in /etc/apt/mirror.list
+          replace:
+                  path: /etc/apt/mirror.list
+                  regexp: "^# set "
+                  replace: "set "
+
+        - name: Disable mirroring security patches and updates
+          replace:
+                  path: /etc/apt/mirror.list
+                  regexp: "^deb( |-src )"
+                  replace: "#deb "
+
+        - name: Adding needed mirror packages sections
+          lineinfile:
+                  path: /etc/apt/mirror.list
+                  line: "{{item}}"
+          with_items:
+                  - "deb http://archive.ubuntu.com/ubuntu/ {{ ubuntu_dist }} main restricted universe multiverse"
+                  - "clean http://archive.ubuntu.com/"
+
+        - debug:
+                msg: "Start downloading the mirror packages, please sit back and relax it may takes HOURS to finis"
+
+        - name: Downloading mirrors....
+          command: apt-mirror /etc/apt/mirror.list
+          register: mirror_output
